@@ -1,9 +1,43 @@
-ambev_data_challenge
+Ambev Data Challenge
 ==============================
 
 A short description of the project.
 
-Project Organization
+## Dependencies
+------------
+
+This project needs some dependencies, the `requirements.txt` has the necessary packages to intall them automatically as we will see later. At this point you need to install Anaconda. We will use `make`too.
+
+## Step by step
+------------
+
+This section will walk with you trhough a step by step to make this project running.
+
+
+### Creating an environment:
+
+First let's create a new environment for this project:
+TODO: run make environments together with this command and test_environment
+```
+make create_environment
+```
+Then activate it with this command:
+```
+source activate ambev_data_challenge
+```
+
+### Getting the data - everything starts here:
+The `data` folder is empty becaus it's not on the source control. You can download the data using this command:
+```
+make data
+```
+Before it starts working with the data, this command will do 2 steps automatically:
+- Install all necessary packages (command `make requirements`) based on requirements.txt
+- Check the environment we just created (command `make test_environment`)
+Then this will download the data into `data/raw` folder. Once the download is done, it will create a CSV file to each worksheet into the folder `data/interim`
+
+
+## Project Organization
 ------------
 
     ├── LICENSE
