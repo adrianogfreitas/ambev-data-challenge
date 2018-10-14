@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+"""Download the dataset and transform into a CSV File."""
 import logging
 import os
 import pandas as pd
@@ -11,7 +12,7 @@ def init_log():
     logger.setLevel(logging.INFO)
 
     # create file handler
-    fh = logging.FileHandler('src/data/make_dataset.info')
+    fh = logging.FileHandler('src/data/make_dataset.log')
     fh.setLevel(logging.INFO)
 
     # create console handler
@@ -74,13 +75,16 @@ def save_to_csv(raw_path, filename, logger):
             df = []
             logger.info('- Reading data...')
             with wb.get_sheet(sheetname) as sheet:
-                for row in sheet.rows():
+                for i, row in enumerate(sheet.rows()):
                     values = [r.v for r in row]
                     df.append(values)
+                    if i % 1000 == 0:
+                        logger.info('{:6d} loaded rows...'.format(i))
+            
             logger.info('- Converting')
-            df = pd.DataFrame(df[1:], columns=df[0], index_label='id')
+            df = pd.DataFrame(df[1:], columns=df[0])
             logger.info('- Creating a file: {}'.format(csv_file))
-            df.to_csv(csv_file)
+            df.to_csv(csv_file, index=False)
             logger.info('- Done!')
 
 

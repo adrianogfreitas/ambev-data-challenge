@@ -27,7 +27,9 @@ source activate ambev_data_challenge
 ```
 
 ### Getting the data - everything starts here:
-The `data` folder is empty becaus it's not on the source control. You can download the data using this command:
+The contents of `data` folder are managed by Git LFS. If you want to download the raw data and do all pre-processing stuff, just empty all folders inside `data` (but keep them) and follow the instructions bellow.
+
+You can download the data using this command:
 ```
 make data
 ```
@@ -89,3 +91,9 @@ Then this will download the data into `data/raw` folder. Once the download is do
 --------
 
 <p><small>Project based on the <a target="_blank" href="https://drivendata.github.io/cookiecutter-data-science/">cookiecutter data science project template</a>. #cookiecutterdatascience</small></p>
+
+TODO:
+- Verificar scripts fora do git
+- colocar datasets no git lfs
+- remover partes relacionadas a s3
+- limpar o diretório final
