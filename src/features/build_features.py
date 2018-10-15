@@ -62,20 +62,48 @@ def check_float(df, cols):
     return df
 
 def replace_nan(df, cols_dict):
-    """Wrap method `replace` from pandas,DataFrame to fit into Prep pipeline."""
+    """Wrap method `replace` from pandas.DataFrame to fit into Prep pipeline."""
     return df.replace(cols_dict, np.nan)
 
-def bin_to_num(df, cols):
-    """Change `sim` and `não` into 1 and 0."""
+def bin_to_num(df, cols, one=['sim'], zero=None):
+    """Change `one` to 1 and `zero` to 0.
+    If `zero` is None, all values not in `one` will be changed to 0.
+    If `zero` is passed, all values not in `one` and `zero` will be changed to np.nan.
+    """
+    i = 0
     for index, row in df.iterrows():
         for col in cols:
             val = df.at[index, col]
-            if isinstance(val, str) and val.lower() == 'sim':
+            if isinstance(val, str) and val in one:
                 df.at[index, col] = 1
-            elif isinstance(val, str) and (val.lower() == 'não' or val.lower() == 'nao'):
+            elif zero is None:
+                df.at[index, col] = 0
+            elif isinstance(val, str) and val in zero:
                 df.at[index, col] = 0
             else:
                 df.at[index, col] = np.nan
+    return df
+
+def transform_month(df, col):
+    """Remove 2017 from month column."""
+    df[col] = df.apply(lambda x, col=col: (x[col]-2017)/10000, axis=1)
+    return df
+
+def filter_valid(df, col, valid_value):
+    """Filter the dataset based on one column, keeping just rows with `valid_value` on `col`."""
+    df = df[df[col] == valid_value]
+    return df
+
+def calc_per_acum(df):
+    """Calculate column `per_acum_acumulado` based on `per_peso_kpi` and `per_pontos_acumulado`."""
+    for idx, row in df[df['per_acum_acumulado'].isna()].iterrows():
+        df.at[idx, 'per_acum_acumulado'] = df.at[idx, 'per_peso_kpi'] * df.at[idx, 'per_pontos_acumulado']   
+    return df
+
+def astype(df, cols, new_type):
+    """Wrap method `astype` from pandas to fit into Prep pipeline."""
+    for col in cols:
+        df[col] = df[col].astype(new_type)
     return df
 
 if __name__ == '__main__':           
@@ -112,5 +140,17 @@ if __name__ == '__main__':
         .fill_null_with(-1.0, per_cols) \
         .apply_custom(check_float, {'cols': per_cols}) \
         .drop_nulls(per_cols) \
-        .apply_custom(replace_nan, {'cols_dict': per_cols_replace})
+        .apply_custom(replace_nan, {'cols_dict': per_cols_replace}) \
+        .apply_custom(bin_to_num, {'cols': ['bin_meta_projeto'], 'one': ['Sim'], 'zero': ['Não']}) \
+        .apply_custom(bin_to_num, {'cols': ['bin_status_meta'], 'one': 'Monitoramento Aprovado'}) \
+        .apply_custom(transform_month, {'col': 'ord_mes_referencia'}) \
+        .apply_custom(filter_valid, {'col': 'bin_status_meta', 'valid_value': 1}) \
+        .drop_cols(['bin_status_meta']) \
+        .drop_nulls(['nom_grupo_cargo', 'per_pontos_mes']) \
+        .fill_null_with('N/A', ['nom_regra_alcance_parcial', 'nom_mundo', 'nom_area']) \
+        .apply_custom(calc_per_acum) \
+        .apply_custom(astype, {'cols': ['bin_meta_projeto'], 'new_type': 'float64'})
         
+    df = prep_df.df
+    df.to_csv('data/processed/ambev-final-dataset-processed.csv')
+    

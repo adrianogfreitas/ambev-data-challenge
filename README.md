@@ -38,6 +38,13 @@ Before it starts working with the data, this command will do 2 steps automatical
 - Check the environment we just created (command `make test_environment`)
 Then this will download the data into `data/raw` folder. Once the download is done, it will create a CSV file to each worksheet into the folder `data/interim`
 
+### Preparing the data:
+After getting the data, we can process this data to be good enough to feed the algoriths. We can do this by running:
+```
+make prepare
+```
+This will take the data in folder `data/interim`, process it and put a new version inside `data/processed`.
+
 
 ## Project Organization
 ------------
