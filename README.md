@@ -41,7 +41,7 @@ Then this will download the data into `data/raw` folder. Once the download is do
 ### Preparing the data:
 After getting the data, we can process this data to be good enough to feed the algoriths. We can do this by running:
 ```
-make prepare
+make prep
 ```
 This will take the data in folder `data/interim`, process it and put a new version inside `data/processed`.
 

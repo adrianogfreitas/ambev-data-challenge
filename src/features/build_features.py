@@ -112,6 +112,11 @@ class PrepAmbev(Prep):
             self._data[col] = self._data[col].astype(new_type)
         return self
 
+    def sort_values(self, cols):
+        """Wrap method `sort_values` from pandas to fit into Prep pipeline."""
+        self._data.sort_values(by=cols, inplace=True)
+        return self
+
 
 if __name__ == '__main__':           
     unnamed_cols = ['Unnamed: 33', 'Unnamed: 34', 'Unnamed: 35', 'Unnamed: 36', 'Unnamed: 37']
@@ -155,8 +160,9 @@ if __name__ == '__main__':
         .drop_nulls(['nom_grupo_cargo', 'per_pontos_mes']) \
         .fill_null_with('N/A', ['nom_regra_alcance_parcial', 'nom_mundo', 'nom_area']) \
         .calc_per_acum() \
-        .astype(cols = ['bin_meta_projeto'], new_type = 'float64')
+        .astype(cols = ['bin_meta_projeto'], new_type = 'float64') \
+        .sort_values(['ord_mes_referencia', 'nom_codigo_kpi', 'dis_nome_funcionario'])
         
     df = prep_df.df
-    df.to_csv('data/processed/ambev-final-dataset-processed.csv')
+    df.to_csv('data/processed/ambev-final-dataset-processed.csv', index=False)
     
