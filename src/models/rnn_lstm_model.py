@@ -18,6 +18,7 @@ import pandas as pd
 import numpy as np
 import os
 import re
+import time
 
 from keras.models import Sequential
 from keras.layers import Dense, Dropout, LSTM
@@ -28,6 +29,15 @@ def log(df, text):
     print(df.shape)
     print(df.columns)
     return df
+
+def remove_last_month(df):
+    df = df[df['ord_mes_referencia']<12]
+    return df
+
+def select_cols(df):
+    df = df[['dis_nome_funcionario', 'nom_codigo_kpi', 'per_ating_mes']]
+    return df
+
 
 data_path = 'data/processed/'
 file_name = 'ambev-final-dataset-processed.csv'
@@ -46,32 +56,34 @@ col_search = np.vectorize(lambda x, pattern=pattern: bool(pattern.search(x)))
 idx_filter = col_search(df.columns)
 nom_cols = df.columns[idx_filter]
 
-drop_cols = [
-    'ord_mes_referencia', 
-    'dis_nome_kpi', 
-    'per_peso_kpi', 
-    'nom_prazo',
-    'nom_regra_alcance_parcial', 
-    'bin_meta_projeto', 
-    'per_pontos_mes',
-    'per_acum_mes', 
-    'per_ating_acumulado',
-    'per_pontos_acumulado', 
-    'per_acum_acumulado', 
-    'per_ating_fim_exer',
-    'per_pontos_fim_exer', 
-    'per_acum_fim_exer'
-]
+# drop_cols = [
+#     'ord_mes_referencia', 
+#     'dis_nome_kpi', 
+#     'per_peso_kpi', 
+#     'nom_prazo',
+#     'nom_regra_alcance_parcial', 
+#     'bin_meta_projeto', 
+#     'per_pontos_mes',
+#     'per_acum_mes', 
+#     'per_ating_acumulado',
+#     'per_pontos_acumulado', 
+#     'per_acum_acumulado', 
+#     'per_ating_fim_exer',
+#     'per_pontos_fim_exer', 
+#     'per_acum_fim_exer'
+# ]
+
+# prep_df = Prep(df) \
+#     .drop_cols(drop_cols) \
+#     .encode(nom_cols) \
+#     .scale()
 
 prep_df = Prep(df) \
-    .apply_custom(log, {'text': 'init'}) \
-    .drop_cols(drop_cols) \
-    .apply_custom(log, {'text': 'cols dropped'}) \
-    .encode(nom_cols) \
-    .apply_custom(log, {'text': 'encoded'}) \
-    .scale() \
-    .apply_custom(log, {'text': 'scaled'})
-
+    .apply_custom(remove_last_month) \
+    .apply_custom(select_cols) \
+    .encode(['nom_codigo_kpi']) \
+    .scale()
+    
 print(prep_df.df.head())
 
 """#### Spliting X e y mantendo sequência de 3 meses"""
@@ -85,18 +97,26 @@ if os.path.isfile('data/processed/X.npy') and os.path.isfile('data/processed/y.n
     X = np.load('data/processed/X.npy')
     y = np.load('data/processed/y.npy')
 else:
+    global_init_time = time.time()
+    loop_init_time = time.time()
     for i in range (i_len, len(train_df)):
         if i == i_len:
-            X = np.array([train_df[i - i_len : i, :17]])
-            y = np.array([train_df[i, 17]])
+            X = np.array([train_df[i - i_len : i, :2]])
+            y = np.array([train_df[i, 2]])
             print(X.shape, y.shape)
+            print(time.time() - loop_init_time)
         else:
-            X = np.append(X, np.array([train_df[i - i_len : i, :17]]), axis=0)
-            y = np.append(y, np.array([train_df[i, 17]]), axis=0)
+            X = np.append(X, np.array([train_df[i - i_len : i, :2]]), axis=0)
+            y = np.append(y, np.array([train_df[i, 2]]), axis=0)
             if i == i_len + 1:
                 print(X.shape, y.shape)
+                print(time.time() - loop_init_time)
             if i % 1000 == 0:
                 print(i, X.shape, y.shape)
+                print(time.time() - loop_init_time)
+                loop_init_time = time.time()
+
+    print(time.time() - global_init_time)            
     np.save('data/processed/X', X)
     np.save('data/processed/y', y)
 
