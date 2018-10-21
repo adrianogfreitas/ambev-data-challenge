@@ -23,10 +23,16 @@ from keras.models import Sequential
 from keras.layers import Dense, Dropout, LSTM
 from keras.callbacks import EarlyStopping, ReduceLROnPlateau, ModelCheckpoint
 
+def log(df, str):
+    print(str)
+    print(df.shape)
+    print(df.columns)
+    return df
+
 data_path = 'data/processed/'
 file_name = 'ambev-final-dataset-processed.csv'
 
-df = pd.read_csv(os.path.join(data_path, file_name))
+df = pd.read_csv(os.path.join(data_path, file_name), low_memory=False)
 df.shape
 df.head()
 
@@ -58,16 +64,20 @@ drop_cols = [
 ]
 
 prep_df = Prep(df) \
+    .apply_custom(log, 'init') \
     .drop_cols(drop_cols) \
+    .apply_custom(log, 'cols dropped') \
     .encode(nom_cols) \
-    .scale()
+    .apply_custom(log, 'encoded') \
+    .scale() \
+    .apply_custom(log, 'scaled')
 
-prep_df.df.head()
+print(prep_df.df.head())
 
 """#### Spliting X e y mantendo sequência de 3 meses"""
 
 train_df = prep_df.df.values
-train_df.shape
+print(train_df.shape)
 
 i_len = 10621 * 3
 
