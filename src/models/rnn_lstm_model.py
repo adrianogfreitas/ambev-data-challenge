@@ -81,18 +81,27 @@ print(train_df.shape)
 
 i_len = 10621 * 3
 
-for i in range (i_len, len(train_df)):
-    if i == i_len:
-        X = np.array([train_df[i - i_len : i, :17]])
-        y = np.array([train_df[i, 17]])
-        print(X.shape, y.shape)
-    else:
-        X = np.append(X, np.array([train_df[i - i_len : i, :17]]), axis=0)
-        y = np.append(y, np.array([train_df[i, 17]]), axis=0)
-        if i == i_len + 1:
+if os.path.isfile('data/processed/X.npy') and os.path.isfile('data/processed/y.npy'):
+    X = np.load('data/processed/X.npy')
+    y = np.load('data/processed/y.npy')
+else:
+    for i in range (i_len, len(train_df)):
+        if i == i_len:
+            X = np.array([train_df[i - i_len : i, :17]])
+            y = np.array([train_df[i, 17]])
             print(X.shape, y.shape)
-        if i % 3000 == 0:
-            print(i, X.shape, y.shape)
+        else:
+            X = np.append(X, np.array([train_df[i - i_len : i, :17]]), axis=0)
+            y = np.append(y, np.array([train_df[i, 17]]), axis=0)
+            if i == i_len + 1:
+                print(X.shape, y.shape)
+            if i % 1000 == 0:
+                print(i, X.shape, y.shape)
+    np.save('data/processed/X', X)
+    np.save('data/processed/y', y)
+
+print(X.shape, y.shape)
+quit()
 
 """## Criando o modelo"""
 

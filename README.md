@@ -8,6 +8,8 @@ A short description of the project.
 
 This project needs some dependencies, the `requirements.txt` has the necessary packages to intall them automatically as we will see later. At this point you need to install Anaconda. We will use `make`too.
 
+**Important:** Git LFS need to be installed too: https://git-lfs.github.com/
+
 ## Step by step
 ------------
 
