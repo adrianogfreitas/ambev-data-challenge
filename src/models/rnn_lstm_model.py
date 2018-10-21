@@ -23,8 +23,8 @@ from keras.models import Sequential
 from keras.layers import Dense, Dropout, LSTM
 from keras.callbacks import EarlyStopping, ReduceLROnPlateau, ModelCheckpoint
 
-def log(df, str):
-    print(str)
+def log(df, text):
+    print(text)
     print(df.shape)
     print(df.columns)
     return df
@@ -64,13 +64,13 @@ drop_cols = [
 ]
 
 prep_df = Prep(df) \
-    .apply_custom(log, 'init') \
+    .apply_custom(log, {'text': 'init'}) \
     .drop_cols(drop_cols) \
-    .apply_custom(log, 'cols dropped') \
+    .apply_custom(log, {'text': 'cols dropped'}) \
     .encode(nom_cols) \
-    .apply_custom(log, 'encoded') \
+    .apply_custom(log, {'text': 'encoded'}) \
     .scale() \
-    .apply_custom(log, 'scaled')
+    .apply_custom(log, {'text': 'scaled'})
 
 print(prep_df.df.head())
 
