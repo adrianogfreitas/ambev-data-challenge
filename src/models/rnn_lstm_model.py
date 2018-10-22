@@ -109,78 +109,84 @@ prep_df = Prep(df) \
     .encode(['nom_codigo_kpi']) \
     .scale()
     
-print(prep_df.df.head())
-
 """#### Spliting X e y mantendo sequência de 3 meses"""
 
-train_df = prep_df.df.values
-print(train_df.shape)
-
-i_len = 10621 * 3
-
-if os.path.isfile('data/processed/X.npy') and os.path.isfile('data/processed/y.npy'):
-    X = np.load('data/processed/X.npy')
-    y = np.load('data/processed/y.npy')
-else:
-    global_init_time = time.time()
-    loop_init_time = time.time()
-    for i in range (i_len, len(train_df)):
-        if i == i_len:
-            X = np.array([train_df[i - i_len : i, :2]])
-            y = np.array([train_df[i, 2]])
-            print(X.shape, y.shape)
-            print(time.time() - loop_init_time)
-        else:
-            X = np.append(X, np.array([train_df[i - i_len : i, :2]]), axis=0)
-            y = np.append(y, np.array([train_df[i, 2]]), axis=0)
-            if i == i_len + 1:
-                print(X.shape, y.shape)
-                print(time.time() - loop_init_time)
-            if i % 1000 == 0:
-                print(i, X.shape, y.shape)
-                print(time.time() - loop_init_time)
-                loop_init_time = time.time()
-
-    print(time.time() - global_init_time)            
-    np.save('data/processed/X', X)
-    np.save('data/processed/y', y)
+# train_df = prep_df.df.values
+# i_len = 10621 * 3
 
 # if os.path.isfile('data/processed/X.npy') and os.path.isfile('data/processed/y.npy'):
 #     X = np.load('data/processed/X.npy')
 #     y = np.load('data/processed/y.npy')
 # else:
-#     X = np.array([train_df[:i_len, :2]])
-#     y = np.array([train_df[i_len, 2]])
-#     print('inicio')
-#     X = [delayed(np.append)(X, np.array([train_df[i - i_len : i, :2]]), axis=0) for i in range(i_len+1, len(train_df))]
-#     X = compute(X)
-#     print('fim X')
-#     y = [delayed(np.append)(y, np.array([train_df[i, 2]]), axis=0) for i in range(i_len+1, len(train_df))]
-#     y = compute(y)
-#     print('fim y')
-    
-#     # global_init_time = time.time()
-#     # loop_init_time = time.time()
-#     # for i in range (i_len, len(train_df)):
-#     #     if i == i_len:
-#     #         X = np.array([train_df[i - i_len : i, :2]])
-#     #         y = np.array([train_df[i, 2]])
-#     #         print(X.shape, y.shape)
-#     #         print(time.time() - loop_init_time)
-#     #     else:
-#     #         X = np.append(X, np.array([train_df[i - i_len : i, :2]]), axis=0)
-#     #         y = np.append(y, np.array([train_df[i, 2]]), axis=0)
-#     #         if i == i_len + 1:
-#     #             print(X.shape, y.shape)
-#     #             print(time.time() - loop_init_time)
-#     #         if i % 1000 == 0:
-#     #             print(i, X.shape, y.shape)
-#     #             print(time.time() - loop_init_time)
-#     #             loop_init_time = time.time()
+#     global_init_time = time.time()
+#     loop_init_time = time.time()
+#     for i in range (i_len, len(train_df)):
+#         if i == i_len:
+#             X = np.array([train_df[i - i_len : i, :2]])
+#             y = np.array([train_df[i, 2]])
+#             print(X.shape, y.shape)
+#             print(time.time() - loop_init_time)
+#         else:
+#             X = np.append(X, np.array([train_df[i - i_len : i, :2]]), axis=0)
+#             y = np.append(y, np.array([train_df[i, 2]]), axis=0)
+#             if i == i_len + 1:
+#                 print(X.shape, y.shape)
+#                 print(time.time() - loop_init_time)
+#             if i % 1000 == 0:
+#                 print(i, X.shape, y.shape)
+#                 print(time.time() - loop_init_time)
+#                 loop_init_time = time.time()
 
-#     # print(time.time() - global_init_time)            
+#     print(time.time() - global_init_time)            
 #     np.save('data/processed/X', X)
 #     np.save('data/processed/y', y)
+
+if os.path.isfile('data/processed/X.npy') and os.path.isfile('data/processed/y.npy'):
+    X = np.load('data/processed/X.npy')
+    y = np.load('data/processed/y.npy')
+else:
+    from dask.distributed import Client, progress
+    import dask.array as da
+    from multiprocessing import cpu_count
+
+    # client = Client(threads_per_worker=4, n_workers=cpu_count())
+    # print(client)
+    
+    train_df = da.from_array(prep_df.df.values, chunks=1000)
+    i_len = 10621 * 3
+    
+    X = np.array([train_df[:i_len, :2]])
+    y = np.array([train_df[i_len, 2]])
+    print('inicio')
+    X = [delayed(np.append)(X, np.array([train_df[i - i_len : i, :2]]), axis=0) for i in range(i_len+1, len(train_df))]
+    X = compute(X)
+    print('fim X')
+    y = [delayed(np.append)(y, np.array([train_df[i, 2]]), axis=0) for i in range(i_len+1, len(train_df))]
+    y = compute(y)
+    print('fim y')
+    
+    # global_init_time = time.time()
+    # loop_init_time = time.time()
+    # for i in range (i_len, len(train_df)):
+    #     if i == i_len:
+    #         X = np.array([train_df[i - i_len : i, :2]])
+    #         y = np.array([train_df[i, 2]])
+    #         print(X.shape, y.shape)
+    #         print(time.time() - loop_init_time)
+    #     else:
+    #         X = np.append(X, np.array([train_df[i - i_len : i, :2]]), axis=0)
+    #         y = np.append(y, np.array([train_df[i, 2]]), axis=0)
+    #         if i == i_len + 1:
+    #             print(X.shape, y.shape)
+    #             print(time.time() - loop_init_time)
+    #         if i % 1000 == 0:
+    #             print(i, X.shape, y.shape)
+    #             print(time.time() - loop_init_time)
+    #             loop_init_time = time.time()
+
+    # print(time.time() - global_init_time)            
+    np.save('data/processed/X', X)
+    np.save('data/processed/y', y)
 
 print(X.shape, y.shape)
 quit()
