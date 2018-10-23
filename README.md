@@ -1,7 +1,11 @@
 Ambev Data Challenge
 ==============================
 
-A short description of the project.
+We want to analyze the monitoring of employees' goals, and create a model to predict their achievement.
+
+All this project was made using Jupyter Notebook, you just need to do a few steps to see it running. The steps are listed bellow and the explanation of each notebook too.
+
+The final report can be found on `final_report.pdf`.
 
 ## Dependencies
 ------------
@@ -19,7 +23,6 @@ This section will walk with you trhough a step by step to make this project runn
 ### Creating an environment:
 
 First let's create a new environment for this project:
-TODO: run make environments together with this command and test_environment
 ```
 make create_environment
 ```
@@ -29,7 +32,7 @@ source activate ambev_data_challenge
 ```
 
 ### Getting the data - everything starts here:
-The contents of `data` folder are managed by Git LFS. If you want to download the raw data and do all pre-processing stuff, just empty all folders inside `data` (but keep them) and follow the instructions bellow.
+The contents of `data` folder are managed by Git LFS. If you want to download the raw data and do all pre-processing stuff, just empty all folders inside `data` (but keep the folder structure) and follow the instructions bellow.
 
 You can download the data using this command:
 ```
@@ -46,6 +49,19 @@ After getting the data, we can process this data to be good enough to feed the a
 make prep
 ```
 This will take the data in folder `data/interim`, process it and put a new version inside `data/processed`.
+
+All process made by this step can be found in `notebooks/01-agf-data-wrangling.ipynb` with all explanations and a couple of plots.
+
+## Notebooks
+As we said, all this project was made using Jupyter Notebooks, they are organized at this way:
+- **00-agf-utils.ipynb**: You do not need to run this notebook, this is used by others and have some util functions, some imports and definitions.
+- **01-agf-data-wrangling.ipynb**: This notebook do all data cleaning and preparation. Some analysis are made here too.
+- **02-agf-exploratory-data-analysis.ipynb**: This notebook do an EDA on top of a database prepared by `01-agf-data-wrangling.ipynb`.
+- **03-agf-model.ipynb**: This notebook make a LSTM model on top of a database prepared by `01-agf-data-wrangling.ipynb`.
+- **04-agf-final-report**: Just to suport the final report.
+
+## Next Steps:
+The RNN model is not done, so the big next step is to finalize it and measure the results.
 
 
 ## Project Organization
@@ -100,9 +116,3 @@ This will take the data in folder `data/interim`, process it and put a new versi
 --------
 
 <p><small>Project based on the <a target="_blank" href="https://drivendata.github.io/cookiecutter-data-science/">cookiecutter data science project template</a>. #cookiecutterdatascience</small></p>
-
-TODO:
-- Verificar scripts fora do git
-- colocar datasets no git lfs
-- remover partes relacionadas a s3
-- limpar o diretório final
